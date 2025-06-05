@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CleanMaster - Votre application motivante pour le ménage</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Animation pour la progression */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Style personnalisé pour les cartes */
+        .room-card {
+            transition: all 0.3s ease;
+        }
+        .room-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Style pour la modale */
+        .modal {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .modal-enter {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        .modal-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+                 /* Animations confetti */
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        /* Animation feu d'artifice pour les pièces */
+        @keyframes firework-explosion {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg) scale(0);
+                opacity: 1;
+            }
+            20% {
+                opacity: 1;
+                scale: 1;
+            }
+            100% {
+                opacity: 0;
+                scale: 0.5;
+            }
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        .confetti.square {
+            background: #f43f5e;
+        }
+        
+        .confetti.circle {
+            background: #8b5cf6;
+            border-radius: 50%;
+        }
+        
+        .confetti.triangle {
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 10px solid #06d6a0;
+        }
+        
+        /* Super modal de célébration finale */
+        .super-celebration {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            animation: celebration-pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes celebration-pulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.05) rotate(1deg); }
+        }
+        
+        .celebration-text {
+            animation: celebration-bounce 1s ease-in-out infinite;
+        }
+        
+        @keyframes celebration-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .rainbow-text {
+            background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #54a0ff);
+            background-size: 400% 400%;
+            animation: rainbow-animation 2s ease infinite;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        @keyframes rainbow-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen font-sans">
+    <div class="container mx-auto px-4 py-8">
+        <!-- En-tête -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-purple-800 mb-2">CleanMaster</h1>
+            <p class="text-xl text-gray-600">Votre compagnon motivant pour un foyer impeccable</p>
+            
+            <!-- Progression globale -->
+            <div class="bg-white rounded-full w-64 h-64 mx-auto mt-8 mb-6 shadow-xl relative flex items-center justify-center pulse-animation" id="progressCircle">
+                <svg class="w-full h-full" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="#e2e8f0" stroke-width="8"/>
+                    <circle id="progressBar" cx="50" cy="50" r="45" fill="none" stroke="#7c3aed" stroke-width="8" 
+                            stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="283" transform="rotate(-90 50 50)"/>
+                </svg>
+                <div class="absolute text-center">
+                    <span class="text-4xl font-bold text-purple-800" id="percentage">0%</span>
+                    <p class="text-gray-500 mt-1">Progression</p>
+                </div>
+            </div>
+            
+            <div class="flex gap-4 justify-center">
+                <button onclick="showMotivation()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-full transition duration-300 transform hover:scale-105">
+                    <i class="fas fa-bolt mr-2"></i>Motivation!
+                </button>
+                <button onclick="showRoomManager()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-full transition duration-300 transform hover:scale-105">
+                    <i class="fas fa-cog mr-2"></i>Gérer les pièces
+                </button>
+            </div>
+        </header>
+        
+        <!-- Section des pièces -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Vos pièces à nettoyer</h2>
+            
+            <div id="roomsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Les pièces seront générées dynamiquement ici -->
+            </div>
+        </section>
+        
+        <!-- Récompenses -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Vos récompenses</h2>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 rewards-grid">
+                <div class="reward-card bg-white rounded-lg shadow p-4 text-center">
+                    <div class="bg-gray-100 rounded-full w-16 h-16 mx-auto mb-2 flex items-center justify-center">
+                        <i class="fas fa-coffee text-gray-400 text-2xl"></i>
+                    </div>
+                    <p class="text-sm text-gray-600">1x Café tranquille</p>
+                </div>
+                <div class="reward-card bg-white rounded-lg shadow p-4 text-center">
+                    <div class="bg-gray-100 rounded-full w-16 h-16 mx-auto mb-2 flex items-center justify-center">
+                        <i class="fas fa-film text-gray-400 text-2xl"></i>
+                    </div>
+                    <p class="text-sm text-gray-600">1 épisode série</p>
+                </div>
+                <div class="reward-card bg-white rounded-lg shadow p-4 text-center">
+                    <div class="bg-gray-100 rounded-full w-16 h-16 mx-auto mb-2 flex items-center justify-center">
+                        <i class="fas fa-cookie text-gray-400 text-2xl"></i>
+                    </div>
+                    <p class="text-sm text-gray-600">1 gourmandise</p>
+                </div>
+                <div class="reward-card bg-white rounded-lg shadow p-4 text-center">
+                    <div class="bg-gray-100 rounded-full w-16 h-16 mx-auto mb-2 flex items-center justify-center">
+                        <i class="fas fa-wine-glass-alt text-gray-400 text-2xl"></i>
+                    </div>
+                    <p class="text-sm text-gray-600">1 verre de vin</p>
+                </div>
+                <div class="reward-card bg-white rounded-lg shadow p-4 text-center">
+                    <div class="bg-gray-100 rounded-full w-16 h-16 mx-auto mb-2 flex items-center justify-center">
+                        <i class="fas fa-book text-gray-400 text-2xl"></i>
+                    </div>
+                    <p class="text-sm text-gray-600">30min lecture</p>
+                </div>
+                <div class="reward-card bg-white rounded-lg shadow p-4 text-center">
+                    <div class="bg-gray-100 rounded-full w-16 h-16 mx-auto mb-2 flex items-center justify-center">
+                        <i class="fas fa-music text-gray-400 text-2xl"></i>
+                    </div>
+                    <p class="text-sm text-gray-600">Soirée musique</p>
+                </div>
+                <div class="reward-card bg-white rounded-lg shadow p-4 text-center">
+                    <div class="bg-gray-100 rounded-full w-16 h-16 mx-auto mb-2 flex items-center justify-center">
+                        <i class="fas fa-gamepad text-gray-400 text-2xl"></i>
+                    </div>
+                    <p class="text-sm text-gray-600">1h de jeu</p>
+                </div>
+            </div>
+            
+            <div class="mt-8 bg-white rounded-xl shadow-lg p-6 text-center">
+                <h3 class="text-xl font-bold text-purple-700 mb-2">Récompense spéciale!</h3>
+                <p class="text-gray-600 mb-4">Terminez toutes les pièces pour débloquer votre récompense spéciale</p>
+                <div class="bg-purple-100 rounded-full w-32 h-32 mx-auto flex items-center justify-center">
+                    <i class="fas fa-gift text-purple-500 text-5xl opacity-50"></i>
+                    <span class="absolute text-xs text-purple-800 font-bold">???</span>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <!-- Modale de motivation -->
+    <div id="motivationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 opacity-0 pointer-events-none modal">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 relative modal-content">
+            <button onclick="hideMotivation()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            <div class="text-center">
+                <div class="bg-purple-100 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                    <i class="fas fa-star text-purple-600 text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-purple-800 mb-2" id="motivationTitle">Vous êtes génial!</h3>
+                <p class="text-gray-600 mb-4" id="motivationText">Chaque petite action compte. Même un petit effort maintenant vous rapprochera d'une maison impeccable!</p>
+                <button onclick="hideMotivation()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-full transition duration-300">
+                    Merci! <i class="fas fa-heart ml-1"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Super Modale de Célébration Finale -->
+    <div id="superCelebrationModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 opacity-0 pointer-events-none modal">
+        <div class="super-celebration rounded-3xl shadow-2xl p-12 max-w-2xl w-full mx-4 relative text-white">
+            <button onclick="hideSuperCelebration()" class="absolute top-6 right-6 text-white hover:text-gray-200">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+            <div class="text-center">
+                <div class="mb-8">
+                    <div class="text-8xl mb-4">🎉</div>
+                    <h1 class="text-6xl font-bold rainbow-text celebration-text mb-4">INCROYABLE!</h1>
+                    <h2 class="text-3xl font-bold mb-4">🏆 MISSION ACCOMPLIE! 🏆</h2>
+                </div>
+                
+                <div class="bg-white bg-opacity-20 rounded-xl p-6 mb-8">
+                    <p class="text-xl mb-4">
+                        🌟 Vous avez nettoyé TOUTE votre maison ! 🌟
+                    </p>
+                    <p class="text-lg mb-2">
+                        ✨ Votre maison brille de propreté ✨
+                    </p>
+                    <p class="text-lg">
+                        🎯 Vous êtes un véritable CHAMPION du ménage ! 🎯
+                    </p>
+                </div>
+                
+                <div class="text-center mb-8">
+                    <div class="text-6xl mb-4">🎁</div>
+                    <h3 class="text-2xl font-bold mb-2">RÉCOMPENSE SPÉCIALE DÉBLOQUÉE!</h3>
+                    <div class="bg-yellow-400 text-purple-900 rounded-full px-6 py-3 inline-block font-bold text-xl">
+                        🍾 UNE SOIRÉE DÉTENTE MÉRITÉE! 🍾
+                    </div>
+                </div>
+                
+                <button onclick="hideSuperCelebration()" class="bg-yellow-400 hover:bg-yellow-500 text-purple-900 font-bold py-4 px-8 rounded-full text-xl transition duration-300 transform hover:scale-105">
+                    JE L'AI MÉRITÉ! 🎊
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale de Gestion des Pièces -->
+    <div id="roomManagerModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 opacity-0 pointer-events-none modal">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-4xl w-full mx-4 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="hideRoomManager()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            <div class="text-center mb-6">
+                <h3 class="text-3xl font-bold text-gray-800 mb-2">
+                    <i class="fas fa-home mr-3 text-blue-600"></i>Gérer vos pièces
+                </h3>
+                <p class="text-gray-600">Ajoutez, modifiez ou supprimez vos pièces et leurs tâches</p>
+            </div>
+            
+            <div id="roomsList" class="space-y-4 mb-6">
+                <!-- Les pièces éditables apparaîtront ici -->
+            </div>
+            
+            <div class="flex justify-center gap-4">
+                <button onclick="addNewRoom()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300">
+                    <i class="fas fa-plus mr-2"></i>Ajouter une pièce
+                </button>
+                <button onclick="saveRoomsAndClose()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300">
+                    <i class="fas fa-save mr-2"></i>Sauvegarder et fermer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modèle de données global de l'application
+        let appState = {
+            rooms: [
+                {
+                    id: "bedroom1",
+                    name: "Chambre principale",
+                    icon: "bed",
+                    color: "purple",
+                    tasks: [
+                        { id: "bedroom1-task1", name: "Faire le lit", completed: false },
+                        { id: "bedroom1-task2", name: "Passer l'aspirateur", completed: false },
+                        { id: "bedroom1-task3", name: "Dépoussiérer", completed: false }
+                    ],
+                    completed: false
+                },
+                {
+                    id: "livingroom",
+                    name: "Salon",
+                    icon: "couch",
+                    color: "blue",
+                    tasks: [
+                        { id: "livingroom-task1", name: "Ranger les objets", completed: false },
+                        { id: "livingroom-task2", name: "Nettoyer les surfaces", completed: false },
+                        { id: "livingroom-task3", name: "Passer l'aspirateur", completed: false }
+                    ],
+                    completed: false
+                },
+                {
+                    id: "kitchen",
+                    name: "Cuisine",
+                    icon: "utensils",
+                    color: "yellow",
+                    tasks: [
+                        { id: "kitchen-task1", name: "Faire la vaisselle", completed: false },
+                        { id: "kitchen-task2", name: "Nettoyer le plan de travail", completed: false },
+                        { id: "kitchen-task3", name: "Passer la serpillère", completed: false }
+                    ],
+                    completed: false
+                },
+                {
+                    id: "bathroom",
+                    name: "Salle de bain",
+                    icon: "bath",
+                    color: "green",
+                    tasks: [
+                        { id: "bathroom-task1", name: "Nettoyer les sanitaires", completed: false },
+                        { id: "bathroom-task2", name: "Laver le miroir", completed: false },
+                        { id: "bathroom-task3", name: "Changer les serviettes", completed: false }
+                    ],
+                    completed: false
+                }
+            ],
+            rewards: {
+                available: 0,
+                earned: 0,
+                rewardsList: [
+                    { id: "coffee", name: "1x Café tranquille", icon: "coffee", unlocked: false },
+                    { id: "series", name: "1 épisode série", icon: "film", unlocked: false },
+                    { id: "treat", name: "1 gourmandise", icon: "cookie", unlocked: false },
+                    { id: "wine", name: "1 verre de vin", icon: "wine-glass-alt", unlocked: false },
+                    { id: "reading", name: "30min lecture", icon: "book", unlocked: false },
+                    { id: "music", name: "Soirée musique", icon: "music", unlocked: false },
+                    { id: "gaming", name: "1h de jeu", icon: "gamepad", unlocked: false }
+                ]
+            },
+            user: {
+                lastUpdate: null,
+                sessionsCompleted: 0
+            }
+        };
+
+        // Messages de motivation aléatoires
+        const motivationMessages = [
+            {
+                title: "Vous en êtes capable!",
+                text: "Le premier pas est le plus difficile. Une fois commencé, vous verrez que c'est plus simple que vous ne le pensiez!"
+            },
+            {
+                title: "Pensez au résultat final!",
+                text: "Imaginez la satisfaction d'avoir une maison propre et bien rangée. Ça vaut le coup, non?"
+            },
+            {
+                title: "Petit à petit...",
+                text: "Ne vous submergez pas. Faites une pièce à la fois, une tâche après l'autre. Vous y arriverez!"
+            },
+            {
+                title: "Vous êtes sur la bonne voie!",
+                text: "Même une petite progression est une progression. Continuez comme ça!"
+            },
+            {
+                title: "Inspirez-vous!",
+                text: "Mettez de la musique énergisante ou un podcast intéressant. Le temps passera plus vite tout en nettoyant."
+            }
+        ];
+
+        // ========== GESTION PERSISTANCE DES DONNÉES ==========
+        
+        function saveToLocalStorage() {
+            try {
+                appState.user.lastUpdate = new Date().toISOString();
+                localStorage.setItem('cleanmaster-data', JSON.stringify(appState));
+                console.log('Données sauvegardées avec succès');
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde:', error);
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const savedData = localStorage.getItem('cleanmaster-data');
+                if (savedData) {
+                    const parsedData = JSON.parse(savedData);
+                    // Merge avec la structure par défaut pour éviter les erreurs si des champs manquent
+                    appState = { ...appState, ...parsedData };
+                    console.log('Données chargées avec succès');
+                    return true;
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement:', error);
+            }
+            return false;
+        }
+
+        function resetData() {
+            if (confirm('Êtes-vous sûr de vouloir remettre à zéro toutes vos données ?')) {
+                localStorage.removeItem('cleanmaster-data');
+                location.reload();
+            }
+        }
+
+        // ========== GESTION DES TÂCHES ET PROGRESSION ==========
+
+        function toggleTask(taskId) {
+            // Trouver la tâche dans l'état global
+            for (let room of appState.rooms) {
+                for (let task of room.tasks) {
+                    if (task.id === taskId) {
+                        task.completed = !task.completed;
+                        updateRoomProgress(room.id);
+                        updateGlobalProgress();
+                        saveToLocalStorage();
+                        
+                        // Jouer un son de feedback
+                        if (task.completed) {
+                            playSound('task-complete');
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+
+        function updateRoomProgress(roomId) {
+            const room = appState.rooms.find(r => r.id === roomId);
+            if (!room) return;
+
+            const completedTasks = room.tasks.filter(task => task.completed).length;
+            const totalTasks = room.tasks.length;
+            const progressPercentage = Math.round((completedTasks / totalTasks) * 100);
+            
+            // Mettre à jour la UI de la pièce
+            const roomElement = document.querySelector(`[data-room-id="${roomId}"]`);
+            if (roomElement) {
+                const progressBar = roomElement.querySelector('.progress-fill');
+                const progressText = roomElement.querySelector('.progress-text');
+                const completeButton = roomElement.querySelector('.complete-button');
+                
+                if (progressBar) progressBar.style.width = `${progressPercentage}%`;
+                if (progressText) progressText.textContent = `${progressPercentage}%`;
+                
+                // Marquer la pièce comme complète si toutes les tâches sont faites
+                const wasCompleted = room.completed;
+                room.completed = (completedTasks === totalTasks);
+                
+                if (room.completed && !wasCompleted) {
+                    // Pièce nouvellement complétée
+                    roomElement.classList.add('bg-green-50', 'border-green-500');
+                    if (completeButton) {
+                        completeButton.textContent = 'Terminé!';
+                        completeButton.classList.remove(`bg-${room.color}-100`, `hover:bg-${room.color}-200`, `text-${room.color}-700`);
+                        completeButton.classList.add('bg-green-100', 'hover:bg-green-200', 'text-green-700');
+                    }
+                    
+                                         // Débloquer une récompense
+                     unlockNextReward();
+                     playSound('room-complete');
+                     
+                     // Effet confetti sur la carte de la pièce
+                     createRoomConfetti(roomElement);
+                    
+                } else if (!room.completed && wasCompleted) {
+                    // Pièce dé-complétée
+                    roomElement.classList.remove('bg-green-50', 'border-green-500');
+                    if (completeButton) {
+                        completeButton.textContent = 'Marquer comme fait';
+                        completeButton.classList.add(`bg-${room.color}-100`, `hover:bg-${room.color}-200`, `text-${room.color}-700`);
+                        completeButton.classList.remove('bg-green-100', 'hover:bg-green-200', 'text-green-700');
+                    }
+                }
+            }
+        }
+
+        function markRoomComplete(button) {
+            const roomElement = button.closest('.room-card');
+            const roomId = roomElement.getAttribute('data-room-id');
+            const room = appState.rooms.find(r => r.id === roomId);
+            
+            if (!room) return;
+            
+            // Marquer toutes les tâches comme complètes
+            room.tasks.forEach(task => task.completed = true);
+            
+            // Mettre à jour toutes les checkboxes
+            roomElement.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            
+            updateRoomProgress(roomId);
+            updateGlobalProgress();
+            saveToLocalStorage();
+        }
+
+        function updateGlobalProgress() {
+            let totalTasks = 0;
+            let completedTasks = 0;
+            let completedRooms = 0;
+            
+            appState.rooms.forEach(room => {
+                totalTasks += room.tasks.length;
+                completedTasks += room.tasks.filter(task => task.completed).length;
+                if (room.completed) completedRooms++;
+            });
+            
+            const globalPercentage = Math.round((completedTasks / totalTasks) * 100);
+            document.getElementById('percentage').textContent = `${globalPercentage}%`;
+            
+            // Animer la barre de progression circulaire
+            const progressBar = document.getElementById('progressBar');
+            const circumference = 2 * Math.PI * 45;
+            const offset = circumference - (globalPercentage / 100) * circumference;
+            progressBar.style.strokeDashoffset = offset;
+            
+            // Animation pour les étapes importantes
+            const progressCircle = document.getElementById('progressCircle');
+            if (globalPercentage > 0 && globalPercentage < 100) {
+                progressCircle.classList.add('pulse-animation');
+            } else if (globalPercentage === 100) {
+                progressCircle.classList.remove('pulse-animation');
+                celebrateCompletion();
+            }
+            
+            // Mettre à jour les récompenses disponibles
+            updateRewardsUI();
+        }
+
+        // ========== GESTION DES RÉCOMPENSES ==========
+
+                 function unlockNextReward() {
+             const nextReward = appState.rewards.rewardsList.find(reward => !reward.unlocked);
+             if (nextReward) {
+                 nextReward.unlocked = true;
+                 appState.rewards.available++;
+                 
+                 console.log(`Récompense débloquée: ${nextReward.name}`);
+                 
+                 // Mettre à jour l'UI immédiatement
+                 updateRewardsUI();
+                 
+                 // Notification visuelle
+                 showRewardNotification(nextReward);
+             }
+         }
+
+                 function updateRewardsUI() {
+             const rewardsContainer = document.querySelector('.rewards-grid');
+             if (!rewardsContainer) {
+                 console.log('Conteneur de récompenses non trouvé');
+                 return;
+             }
+             
+             appState.rewards.rewardsList.forEach((reward, index) => {
+                 const rewardElement = rewardsContainer.children[index];
+                 if (rewardElement) {
+                     const icon = rewardElement.querySelector('i');
+                     const bgContainer = rewardElement.querySelector('div > div'); // Le conteneur avec bg-gray-100
+                     
+                     console.log(`Mise à jour récompense ${index}: ${reward.name}, débloquée: ${reward.unlocked}`);
+                     
+                     if (reward.unlocked) {
+                         if (icon) {
+                             icon.classList.remove('text-gray-400');
+                             icon.classList.add('text-purple-600');
+                         }
+                         if (bgContainer) {
+                             bgContainer.classList.remove('bg-gray-100');
+                             bgContainer.classList.add('bg-purple-100');
+                         }
+                         rewardElement.classList.add('cursor-pointer', 'hover:scale-105', 'transition-transform');
+                         rewardElement.style.opacity = '1';
+                     } else {
+                         if (icon) {
+                             icon.classList.add('text-gray-400');
+                             icon.classList.remove('text-purple-600');
+                         }
+                         if (bgContainer) {
+                             bgContainer.classList.add('bg-gray-100');
+                             bgContainer.classList.remove('bg-purple-100');
+                         }
+                         rewardElement.classList.remove('cursor-pointer', 'hover:scale-105', 'transition-transform');
+                         rewardElement.style.opacity = '0.7';
+                     }
+                 } else {
+                     console.log(`Élément de récompense ${index} non trouvé`);
+                 }
+             });
+         }
+
+        function showRewardNotification(reward) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-purple-600 text-white p-4 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300';
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-${reward.icon} mr-3 text-xl"></i>
+                    <div>
+                        <div class="font-bold">Récompense débloquée!</div>
+                        <div class="text-sm">${reward.name}</div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.classList.remove('translate-x-full'), 100);
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // ========== FONCTIONS UTILITAIRES ==========
+
+                 function playSound(type) {
+             const sounds = {
+                 'task-complete': 'https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3',
+                 'room-complete': 'https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3',
+                 'super-complete': 'https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3'
+             };
+             
+             if (sounds[type]) {
+                 const audio = new Audio(sounds[type]);
+                 audio.play().catch(e => console.log("Le son ne peut pas être joué automatiquement"));
+             }
+         }
+
+         // ========== EFFETS CONFETTI ==========
+
+         function createConfetti(container, count = 20) {
+             const colors = ['square', 'circle', 'triangle'];
+             
+             for (let i = 0; i < count; i++) {
+                 const confetti = document.createElement('div');
+                 confetti.className = `confetti ${colors[Math.floor(Math.random() * colors.length)]}`;
+                 
+                 // Position aléatoire
+                 confetti.style.left = Math.random() * 100 + '%';
+                 confetti.style.animationDelay = Math.random() * 2 + 's';
+                 confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                 confetti.style.animation = `confetti-fall ${confetti.style.animationDuration} ${confetti.style.animationDelay} ease-out forwards`;
+                 
+                 container.appendChild(confetti);
+                 
+                 // Nettoyer après l'animation
+                 setTimeout(() => {
+                     if (confetti.parentNode) {
+                         confetti.parentNode.removeChild(confetti);
+                     }
+                 }, 5000);
+             }
+         }
+
+         function createRoomConfetti(roomElement) {
+             // Confetti localisé sur la carte de la pièce
+             roomElement.style.position = 'relative';
+             roomElement.style.overflow = 'visible';
+             
+             // Effet feu d'artifice avec explosion depuis le bas de la carte
+             createFireworkExplosion(roomElement);
+             
+             // Animation de la carte elle-même
+             roomElement.style.transform = 'scale(1.08)';
+             roomElement.style.transition = 'transform 0.4s ease';
+             roomElement.style.boxShadow = '0 0 30px rgba(139, 92, 246, 0.6)';
+             
+             setTimeout(() => {
+                 roomElement.style.transform = 'scale(1)';
+                 roomElement.style.boxShadow = '';
+             }, 400);
+         }
+
+         function createFireworkExplosion(roomElement) {
+             const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd'];
+             const shapes = ['●', '★', '♦', '▲', '■', '🎉', '🎊', '✨'];
+             
+             // Créer un conteneur full-screen pour l'explosion
+             const explosionContainer = document.createElement('div');
+             explosionContainer.style.position = 'fixed';
+             explosionContainer.style.top = '0';
+             explosionContainer.style.left = '0';
+             explosionContainer.style.width = '100vw';
+             explosionContainer.style.height = '100vh';
+             explosionContainer.style.pointerEvents = 'none';
+             explosionContainer.style.zIndex = '9999';
+             explosionContainer.style.overflow = 'visible';
+             document.body.appendChild(explosionContainer);
+             
+             // Position de départ : centre-bas de la carte (en coordonnées absolues)
+             const cardRect = roomElement.getBoundingClientRect();
+             const startX = cardRect.left + cardRect.width / 2;
+             const startY = cardRect.bottom - 20;
+             
+             // Créer BEAUCOUP plus de confetti (100 au lieu de 60)
+             for (let i = 0; i < 100; i++) {
+                 const confetti = document.createElement('div');
+                 
+                 // Style du confetti plus gros et plus visible
+                 confetti.innerHTML = shapes[Math.floor(Math.random() * shapes.length)];
+                 confetti.style.position = 'absolute';
+                 confetti.style.fontSize = (Math.random() * 24 + 16) + 'px'; // Plus gros !
+                 confetti.style.color = colors[Math.floor(Math.random() * colors.length)];
+                 confetti.style.fontWeight = 'bold';
+                 confetti.style.pointerEvents = 'none';
+                 confetti.style.textShadow = '2px 2px 4px rgba(0,0,0,0.3)';
+                 
+                 // Position de départ en pixels absolus
+                 confetti.style.left = startX + 'px';
+                 confetti.style.top = startY + 'px';
+                 
+                 // Trajectoire d'explosion BEAUCOUP plus large
+                 const angle = (Math.random() * 140 - 70) * (Math.PI / 180); // -70° à +70°
+                 const velocity = Math.random() * 400 + 200; // BEAUCOUP plus loin !
+                 const finalX = startX + Math.sin(angle) * velocity;
+                 const finalY = startY - Math.cos(angle) * velocity * 0.8; // Projection verticale
+                 
+                 // Animation PLUS LONGUE
+                 const animationDuration = Math.random() * 2 + 3; // 3 à 5 secondes !
+                 const delay = Math.random() * 0.5; // Délai plus étalé
+                 
+                 explosionContainer.appendChild(confetti);
+                 
+                 // Animation avec trajectoire réaliste
+                 setTimeout(() => {
+                     confetti.style.transition = `all ${animationDuration}s cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+                     confetti.style.left = finalX + 'px';
+                     confetti.style.top = finalY + 'px';
+                     confetti.style.transform = `rotate(${Math.random() * 1440 + 720}deg) scale(0.3)`;
+                     confetti.style.opacity = '0';
+                 }, delay * 1000);
+                 
+                 // Nettoyer après l'animation
+                 setTimeout(() => {
+                     if (confetti.parentNode) {
+                         confetti.parentNode.removeChild(confetti);
+                     }
+                 }, (animationDuration + delay + 1) * 1000);
+             }
+             
+             // Nettoyer le conteneur complet après toutes les animations
+             setTimeout(() => {
+                 if (explosionContainer.parentNode) {
+                     explosionContainer.parentNode.removeChild(explosionContainer);
+                 }
+             }, 7000);
+             
+             // Ajouter des étincelles supplémentaires pour l'effet "wow"
+             setTimeout(() => {
+                 createSparkles(roomElement);
+             }, 300);
+             
+             // Seconde vague d'explosion pour plus d'impact
+             setTimeout(() => {
+                 createSecondWave(explosionContainer, startX, startY);
+             }, 800);
+         }
+
+         function createSecondWave(container, startX, startY) {
+             const colors = ['#ffd700', '#ff4757', '#3742fa', '#2ed573', '#ff6348'];
+             const shapes = ['✦', '✧', '❋', '❈', '✯'];
+             
+             for (let i = 0; i < 30; i++) {
+                 const confetti = document.createElement('div');
+                 confetti.innerHTML = shapes[Math.floor(Math.random() * shapes.length)];
+                 confetti.style.position = 'absolute';
+                 confetti.style.fontSize = (Math.random() * 20 + 12) + 'px';
+                 confetti.style.color = colors[Math.floor(Math.random() * colors.length)];
+                 confetti.style.fontWeight = 'bold';
+                 confetti.style.pointerEvents = 'none';
+                 confetti.style.textShadow = '0 0 10px currentColor';
+                 
+                 confetti.style.left = startX + 'px';
+                 confetti.style.top = startY + 'px';
+                 
+                 const angle = (Math.random() * 360) * (Math.PI / 180);
+                 const velocity = Math.random() * 300 + 150;
+                 const finalX = startX + Math.sin(angle) * velocity;
+                 const finalY = startY + Math.cos(angle) * velocity;
+                 
+                 container.appendChild(confetti);
+                 
+                 setTimeout(() => {
+                     confetti.style.transition = 'all 2.5s ease-out';
+                     confetti.style.left = finalX + 'px';
+                     confetti.style.top = finalY + 'px';
+                     confetti.style.transform = `rotate(${Math.random() * 720}deg) scale(0)`;
+                     confetti.style.opacity = '0';
+                 }, Math.random() * 200);
+             }
+         }
+
+         function createSparkles(roomElement) {
+             // Étincelles dorées pour l'effet final
+             for (let i = 0; i < 20; i++) {
+                 const sparkle = document.createElement('div');
+                 sparkle.innerHTML = '✨';
+                 sparkle.style.position = 'absolute';
+                 sparkle.style.fontSize = '12px';
+                 sparkle.style.pointerEvents = 'none';
+                 sparkle.style.zIndex = '1001';
+                 
+                 // Position aléatoire autour de la carte
+                 sparkle.style.left = (Math.random() * 100) + '%';
+                 sparkle.style.top = (Math.random() * 100) + '%';
+                 
+                 sparkle.style.animation = 'firework-explosion 0.8s ease-out forwards';
+                 
+                 roomElement.appendChild(sparkle);
+                 
+                 setTimeout(() => {
+                     if (sparkle.parentNode) {
+                         sparkle.parentNode.removeChild(sparkle);
+                     }
+                 }, 1000);
+             }
+         }
+
+         function createFullScreenConfetti() {
+             // Confetti sur tout l'écran
+             const confettiContainer = document.createElement('div');
+             confettiContainer.style.position = 'fixed';
+             confettiContainer.style.top = '0';
+             confettiContainer.style.left = '0';
+             confettiContainer.style.width = '100%';
+             confettiContainer.style.height = '100%';
+             confettiContainer.style.pointerEvents = 'none';
+             confettiContainer.style.zIndex = '9999';
+             
+             document.body.appendChild(confettiContainer);
+             
+             // Créer plusieurs vagues de confetti
+             createConfetti(confettiContainer, 50);
+             
+             setTimeout(() => createConfetti(confettiContainer, 30), 500);
+             setTimeout(() => createConfetti(confettiContainer, 20), 1000);
+             
+             // Nettoyer le conteneur après
+             setTimeout(() => {
+                 if (confettiContainer.parentNode) {
+                     confettiContainer.parentNode.removeChild(confettiContainer);
+                 }
+             }, 8000);
+         }
+
+         // ========== SUPER CÉLÉBRATION ==========
+
+         function showSuperCelebration() {
+             const modal = document.getElementById('superCelebrationModal');
+             modal.classList.remove('opacity-0', 'pointer-events-none');
+             modal.classList.add('modal-active');
+         }
+
+         function hideSuperCelebration() {
+             const modal = document.getElementById('superCelebrationModal');
+             modal.classList.add('opacity-0', 'pointer-events-none');
+             modal.classList.remove('modal-active');
+         }
+
+        function showMotivation() {
+            const modal = document.getElementById('motivationModal');
+            const randomMessage = motivationMessages[Math.floor(Math.random() * motivationMessages.length)];
+            
+            document.getElementById('motivationTitle').textContent = randomMessage.title;
+            document.getElementById('motivationText').textContent = randomMessage.text;
+            
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('modal-active');
+            
+            playSound('task-complete');
+        }
+
+        function hideMotivation() {
+            const modal = document.getElementById('motivationModal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modal.classList.remove('modal-active');
+        }
+
+                 function celebrateCompletion() {
+             // Animation de célébration
+             const progressCircle = document.getElementById('progressCircle');
+             progressCircle.classList.add('animate-bounce');
+             
+             setTimeout(() => {
+                 progressCircle.classList.remove('animate-bounce');
+             }, 2000);
+             
+             // Débloquer la récompense spéciale
+             appState.user.sessionsCompleted++;
+             
+             // SUPER CÉLÉBRATION avec confettis full-screen
+             setTimeout(() => {
+                 createFullScreenConfetti();
+                 showSuperCelebration();
+                 playSound('super-complete');
+             }, 1000);
+             
+             saveToLocalStorage();
+         }
+
+        // ========== INITIALISATION ==========
+
+                 // ========== GESTION DES PIÈCES ==========
+
+         const availableIcons = [
+             { icon: 'bed', name: 'Chambre' },
+             { icon: 'couch', name: 'Salon' },
+             { icon: 'utensils', name: 'Cuisine' },
+             { icon: 'bath', name: 'Salle de bain' },
+             { icon: 'toilet', name: 'Toilettes' },
+             { icon: 'car', name: 'Garage' },
+             { icon: 'box-open', name: 'Cellier' },
+             { icon: 'door-open', name: 'Entrée' },
+             { icon: 'stairs', name: 'Escalier' },
+             { icon: 'warehouse', name: 'Buanderie' },
+             { icon: 'seedling', name: 'Jardin' },
+             { icon: 'book', name: 'Bureau' }
+         ];
+
+         const roomColors = ['purple', 'blue', 'yellow', 'green', 'red', 'indigo', 'pink', 'gray'];
+
+         function showRoomManager() {
+             const modal = document.getElementById('roomManagerModal');
+             generateRoomsEditor();
+             modal.classList.remove('opacity-0', 'pointer-events-none');
+             modal.classList.add('modal-active');
+         }
+
+         function hideRoomManager() {
+             const modal = document.getElementById('roomManagerModal');
+             modal.classList.add('opacity-0', 'pointer-events-none');
+             modal.classList.remove('modal-active');
+         }
+
+         function generateRoomsEditor() {
+             const roomsList = document.getElementById('roomsList');
+             roomsList.innerHTML = '';
+
+             appState.rooms.forEach((room, index) => {
+                 const roomEditor = document.createElement('div');
+                 roomEditor.className = 'bg-gray-50 rounded-xl p-6 border border-gray-200';
+                 roomEditor.innerHTML = `
+                     <div class="flex items-center justify-between mb-4">
+                         <h4 class="text-lg font-semibold text-gray-800">Pièce ${index + 1}</h4>
+                         <button onclick="deleteRoom('${room.id}')" class="text-red-500 hover:text-red-700 text-sm">
+                             <i class="fas fa-trash"></i> Supprimer
+                         </button>
+                     </div>
+                     
+                     <div class="grid md:grid-cols-2 gap-4 mb-4">
+                         <div>
+                             <label class="block text-sm font-medium text-gray-700 mb-2">Nom de la pièce</label>
+                             <input type="text" value="${room.name}" onchange="updateRoomName('${room.id}', this.value)" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                         </div>
+                         <div>
+                             <label class="block text-sm font-medium text-gray-700 mb-2">Icône</label>
+                             <select onchange="updateRoomIcon('${room.id}', this.value)" 
+                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                 ${availableIcons.map(iconObj => 
+                                     `<option value="${iconObj.icon}" ${room.icon === iconObj.icon ? 'selected' : ''}>
+                                         ${iconObj.name} (${iconObj.icon})
+                                     </option>`
+                                 ).join('')}
+                             </select>
+                         </div>
+                     </div>
+                     
+                     <div>
+                         <label class="block text-sm font-medium text-gray-700 mb-2">Tâches (exactement 3)</label>
+                         <div class="space-y-2">
+                             ${room.tasks.map((task, taskIndex) => `
+                                 <input type="text" value="${task.name}" 
+                                        onchange="updateTaskName('${room.id}', ${taskIndex}, this.value)"
+                                        placeholder="Tâche ${taskIndex + 1}"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                             `).join('')}
+                         </div>
+                     </div>
+                 `;
+                 roomsList.appendChild(roomEditor);
+             });
+         }
+
+         function updateRoomName(roomId, newName) {
+             const room = appState.rooms.find(r => r.id === roomId);
+             if (room) {
+                 room.name = newName;
+             }
+         }
+
+         function updateRoomIcon(roomId, newIcon) {
+             const room = appState.rooms.find(r => r.id === roomId);
+             if (room) {
+                 room.icon = newIcon;
+             }
+         }
+
+         function updateTaskName(roomId, taskIndex, newName) {
+             const room = appState.rooms.find(r => r.id === roomId);
+             if (room && room.tasks[taskIndex]) {
+                 room.tasks[taskIndex].name = newName;
+             }
+         }
+
+         function deleteRoom(roomId) {
+             if (confirm('Êtes-vous sûr de vouloir supprimer cette pièce ?')) {
+                 appState.rooms = appState.rooms.filter(r => r.id !== roomId);
+                 generateRoomsEditor();
+             }
+         }
+
+         function addNewRoom() {
+             const newRoomId = 'room_' + Date.now();
+             const newRoom = {
+                 id: newRoomId,
+                 name: 'Nouvelle pièce',
+                 icon: 'door-open',
+                 color: roomColors[appState.rooms.length % roomColors.length],
+                 tasks: [
+                     { id: newRoomId + '-task1', name: 'Tâche 1', completed: false },
+                     { id: newRoomId + '-task2', name: 'Tâche 2', completed: false },
+                     { id: newRoomId + '-task3', name: 'Tâche 3', completed: false }
+                 ],
+                 completed: false
+             };
+             
+             appState.rooms.push(newRoom);
+             generateRoomsEditor();
+         }
+
+         function saveRoomsAndClose() {
+             // Régénérer les IDs des tâches pour éviter les conflits
+             appState.rooms.forEach(room => {
+                 room.tasks.forEach((task, index) => {
+                     task.id = room.id + '-task' + (index + 1);
+                 });
+             });
+             
+             saveToLocalStorage();
+             generateRoomCards();
+             addCheckboxListeners();
+             updateGlobalProgress();
+             hideRoomManager();
+             
+             // Notification de succès
+             showNotification('Configuration sauvegardée avec succès!', 'success');
+         }
+
+         function generateRoomCards() {
+             const container = document.getElementById('roomsContainer');
+             container.innerHTML = '';
+             
+             appState.rooms.forEach(room => {
+                 const roomCard = document.createElement('div');
+                 roomCard.className = `room-card bg-white rounded-xl shadow-md p-6 hover:border-l-4 border-${room.color}-500`;
+                 roomCard.setAttribute('data-room-id', room.id);
+                 
+                 const completedTasks = room.tasks.filter(task => task.completed).length;
+                 const progressPercentage = Math.round((completedTasks / room.tasks.length) * 100);
+                 
+                 roomCard.innerHTML = `
+                     <div class="flex items-center mb-4">
+                         <div class="bg-${room.color}-100 p-3 rounded-full mr-4">
+                             <i class="fas fa-${room.icon} text-${room.color}-600 text-xl"></i>
+                         </div>
+                         <h3 class="text-xl font-semibold text-gray-800">${room.name}</h3>
+                     </div>
+                     <div class="w-full bg-gray-200 rounded-full h-2.5 mb-3">
+                         <div class="bg-${room.color}-600 h-2.5 rounded-full progress-fill" style="width: ${progressPercentage}%"></div>
+                     </div>
+                     <div class="flex justify-between text-sm text-gray-500 mb-4">
+                         <span>Progression</span>
+                         <span class="progress-text">${progressPercentage}%</span>
+                     </div>
+                     <div class="space-y-2 mb-4">
+                         ${room.tasks.map(task => `
+                             <div class="flex items-center">
+                                 <input type="checkbox" class="form-checkbox h-5 w-5 text-${room.color}-600" 
+                                        id="${task.id}" ${task.completed ? 'checked' : ''}>
+                                 <label for="${task.id}" class="ml-2 text-gray-700">${task.name}</label>
+                             </div>
+                         `).join('')}
+                     </div>
+                     <button onclick="markRoomComplete(this)" class="complete-button w-full bg-${room.color}-100 hover:bg-${room.color}-200 text-${room.color}-700 font-medium py-2 px-4 rounded-lg transition duration-300">
+                         ${room.completed ? 'Terminé!' : 'Marquer comme fait'}
+                     </button>
+                 `;
+                 
+                 // Appliquer les styles de complétion si nécessaire
+                 if (room.completed) {
+                     roomCard.classList.add('bg-green-50', 'border-green-500');
+                 }
+                 
+                 container.appendChild(roomCard);
+             });
+         }
+
+         function showNotification(message, type = 'info') {
+             const notification = document.createElement('div');
+             const bgColor = type === 'success' ? 'bg-green-600' : 'bg-blue-600';
+             notification.className = `fixed top-4 right-4 ${bgColor} text-white p-4 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300`;
+             notification.innerHTML = `
+                 <div class="flex items-center">
+                     <i class="fas fa-${type === 'success' ? 'check' : 'info'} mr-3 text-xl"></i>
+                     <div>${message}</div>
+                 </div>
+             `;
+             document.body.appendChild(notification);
+             
+             setTimeout(() => notification.classList.remove('translate-x-full'), 100);
+             setTimeout(() => {
+                 notification.classList.add('translate-x-full');
+                 setTimeout(() => notification.remove(), 300);
+             }, 3000);
+         }
+
+         function initializeApp() {
+             // Charger les données sauvegardées
+             const dataLoaded = loadFromLocalStorage();
+             
+             // Générer les pièces dynamiquement
+             generateRoomCards();
+             
+             // Ajouter les event listeners pour les checkboxes
+             addCheckboxListeners();
+             
+             // Mettre à jour la progression initiale
+             updateGlobalProgress();
+             
+             console.log('Application initialisée', dataLoaded ? 'avec données sauvegardées' : 'avec données par défaut');
+         }
+
+        
+
+        function addCheckboxListeners() {
+            // Ajouter les event listeners sur toutes les checkboxes
+            appState.rooms.forEach(room => {
+                room.tasks.forEach(task => {
+                    const checkbox = document.getElementById(task.id);
+                    if (checkbox) {
+                        checkbox.addEventListener('change', () => toggleTask(task.id));
+                    }
+                });
+            });
+        }
+
+        // Initialiser l'application au chargement de la page
+        document.addEventListener('DOMContentLoaded', initializeApp);
+        
+        // Ajouter un bouton de reset pour le développement/test
+        function addResetButton() {
+            const resetButton = document.createElement('button');
+            resetButton.textContent = 'Reset Data';
+            resetButton.className = 'fixed bottom-4 left-4 bg-red-500 text-white px-3 py-2 rounded text-sm hover:bg-red-600';
+            resetButton.onclick = resetData;
+            document.body.appendChild(resetButton);
+        }
+        
+        // Ajouter le bouton de reset en mode développement
+        if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+            document.addEventListener('DOMContentLoaded', addResetButton);
+        }
+    </script>
+</body>
+</html>
