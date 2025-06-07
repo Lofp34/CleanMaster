@@ -4,6 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CleanMaster - Votre application motivante pour le ménage</title>
+    
+    <!-- Meta tags PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="CleanMaster">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="msapplication-TileColor" content="#7c3aed">
+    
+    <!-- Manifest PWA -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Icônes Apple -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-128x128.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/icons/icon-128x128.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/icons/icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/icons/icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/icons/icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="57x57" href="/icons/icon-72x72.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-72x72.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-72x72.png">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -1196,6 +1223,117 @@
 
         // Initialiser l'application au chargement de la page
         document.addEventListener('DOMContentLoaded', initializeApp);
+        
+        // ========== PWA SERVICE WORKER ==========
+        
+        // Enregistrer le Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                .then(function(registration) {
+                    console.log('PWA: Service Worker enregistré avec succès:', registration.scope);
+                    
+                    // Vérifier les mises à jour
+                    registration.addEventListener('updatefound', function() {
+                        console.log('PWA: Nouvelle version disponible');
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', function() {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                showUpdateNotification();
+                            }
+                        });
+                    });
+                })
+                .catch(function(error) {
+                    console.log('PWA: Échec de l\'enregistrement du Service Worker:', error);
+                });
+            });
+        }
+        
+        // Afficher notification de mise à jour
+        function showUpdateNotification() {
+            const updateBanner = document.createElement('div');
+            updateBanner.className = 'fixed top-0 left-0 right-0 bg-blue-600 text-white p-3 text-center z-50';
+            updateBanner.innerHTML = `
+                <p>🚀 Nouvelle version disponible! 
+                   <button onclick="updateApp()" class="ml-3 bg-white text-blue-600 px-3 py-1 rounded text-sm font-medium">
+                       Mettre à jour
+                   </button>
+                   <button onclick="this.parentElement.remove()" class="ml-2 text-blue-200">
+                       ✕
+                   </button>
+                </p>
+            `;
+            document.body.appendChild(updateBanner);
+        }
+        
+        // Mettre à jour l'application
+        function updateApp() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration().then(function(registration) {
+                    if (registration && registration.waiting) {
+                        registration.waiting.postMessage({ action: 'skipWaiting' });
+                        window.location.reload();
+                    }
+                });
+            }
+        }
+        
+        // Gestion de l'installation PWA
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', function(e) {
+            console.log('PWA: Invitation d\'installation détectée');
+            e.preventDefault();
+            deferredPrompt = e;
+            showInstallButton();
+        });
+        
+        function showInstallButton() {
+            const installButton = document.createElement('button');
+            installButton.id = 'installButton';
+            installButton.className = 'fixed bottom-4 right-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-full shadow-lg transition duration-300 transform hover:scale-105';
+            installButton.innerHTML = '<i class="fas fa-download mr-2"></i>Installer l\'app';
+            installButton.onclick = installApp;
+            document.body.appendChild(installButton);
+            
+            // Masquer après 10 secondes
+            setTimeout(() => {
+                if (installButton) {
+                    installButton.style.opacity = '0.7';
+                }
+            }, 10000);
+        }
+        
+        function installApp() {
+            const installButton = document.getElementById('installButton');
+            if (installButton) {
+                installButton.style.display = 'none';
+            }
+            
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(function(result) {
+                    console.log('PWA: Choix d\'installation:', result.outcome);
+                    if (result.outcome === 'accepted') {
+                        showNotification('🎉 CleanMaster installé avec succès!', 'success');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+        
+        // Détecter si l'app est lancée en mode standalone (installée)
+        function isStandalone() {
+            return window.matchMedia('(display-mode: standalone)').matches || 
+                   window.navigator.standalone === true;
+        }
+        
+        // Ajouter des styles spécifiques au mode standalone
+        if (isStandalone()) {
+            document.body.classList.add('standalone-mode');
+            console.log('PWA: Application lancée en mode standalone');
+        }
         
         // Ajouter un bouton de reset pour le développement/test
         function addResetButton() {

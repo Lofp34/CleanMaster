@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test PWA CleanMaster</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+        .status { padding: 15px; margin: 10px 0; border-radius: 5px; font-weight: bold; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #cce7ff; color: #004085; border: 1px solid #b3d7ff; }
+        button { background: #7c3aed; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; margin: 5px; font-size: 16px; }
+        button:hover { background: #6d28d9; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        .icon-test { width: 50px; height: 50px; margin: 10px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test PWA CleanMaster</h1>
+    <p>Cette page vous aide à vérifier que votre PWA fonctionne correctement sur iPhone.</p>
+
+    <div class="test-section">
+        <h2>📱 Compatibilité Navigateur</h2>
+        <div id="browserCheck"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Service Worker</h2>
+        <div id="swStatus"></div>
+        <button onclick="testServiceWorker()">Tester Service Worker</button>
+        <button onclick="unregisterSW()">Désinstaller SW</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📄 Manifest</h2>
+        <div id="manifestStatus"></div>
+        <button onclick="testManifest()">Tester Manifest</button>
+    </div>
+
+    <div class="test-section">
+        <h2>💾 Installation PWA</h2>
+        <div id="installStatus"></div>
+        <button id="installBtn" onclick="installPWA()" style="display:none;">Installer l'App</button>
+    </div>
+
+    <div class="test-section">
+        <h2>🖼️ Icônes</h2>
+        <div id="iconTest"></div>
+        <button onclick="testIcons()">Tester Icônes</button>
+    </div>
+
+    <div class="test-section">
+        <h2>💾 Cache/Stockage</h2>
+        <div id="storageStatus"></div>
+        <button onclick="testStorage()">Tester Stockage</button>
+        <button onclick="clearStorage()">Vider Cache</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Informations Système</h2>
+        <div id="systemInfo"></div>
+        <button onclick="getSystemInfo()">Afficher Infos</button>
+    </div>
+
+    <div class="test-section">
+        <h2>🚀 Actions Rapides</h2>
+        <button onclick="window.location.href='index.html'">🏠 Aller à CleanMaster</button>
+        <button onclick="window.location.reload()">🔄 Recharger</button>
+        <button onclick="openDevTools()">🔧 Console Développeur</button>
+    </div>
+
+    <script>
+        let deferredPrompt;
+
+        // Test de compatibilité navigateur
+        function checkBrowser() {
+            const checks = {
+                'Service Workers': 'serviceWorker' in navigator,
+                'Fetch API': 'fetch' in window,
+                'Cache API': 'caches' in window,
+                'Notifications': 'Notification' in window,
+                'localStorage': 'localStorage' in window,
+                'IndexedDB': 'indexedDB' in window
+            };
+
+            let html = '';
+            let allSupported = true;
+
+            for (const [feature, supported] of Object.entries(checks)) {
+                const status = supported ? 'success' : 'error';
+                const icon = supported ? '✅' : '❌';
+                html += `<div class="${status}">${icon} ${feature}: ${supported ? 'Supporté' : 'Non supporté'}</div>`;
+                if (!supported) allSupported = false;
+            }
+
+            const overall = allSupported ? 
+                '<div class="success">🎉 Votre navigateur supporte toutes les fonctionnalités PWA!</div>' :
+                '<div class="warning">⚠️ Certaines fonctionnalités ne sont pas supportées.</div>';
+
+            document.getElementById('browserCheck').innerHTML = overall + html;
+        }
+
+        // Test Service Worker
+        async function testServiceWorker() {
+            const statusDiv = document.getElementById('swStatus');
+            
+            if (!('serviceWorker' in navigator)) {
+                statusDiv.innerHTML = '<div class="error">❌ Service Workers non supportés</div>';
+                return;
+            }
+
+            try {
+                const registration = await navigator.serviceWorker.register('/sw.js');
+                statusDiv.innerHTML = `
+                    <div class="success">✅ Service Worker enregistré avec succès</div>
+                    <div class="info">Scope: ${registration.scope}</div>
+                    <div class="info">État: ${registration.active ? 'Actif' : 'En attente'}</div>
+                `;
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ Erreur: ${error.message}</div>`;
+            }
+        }
+
+        // Test Manifest
+        async function testManifest() {
+            const statusDiv = document.getElementById('manifestStatus');
+            
+            try {
+                const response = await fetch('/manifest.json');
+                if (response.ok) {
+                    const manifest = await response.json();
+                    statusDiv.innerHTML = `
+                        <div class="success">✅ Manifest chargé avec succès</div>
+                        <div class="info">Nom: ${manifest.name}</div>
+                        <div class="info">Nom court: ${manifest.short_name}</div>
+                        <div class="info">Icônes: ${manifest.icons.length} disponibles</div>
+                        <div class="info">Mode d'affichage: ${manifest.display}</div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = '<div class="error">❌ Impossible de charger le manifest</div>';
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ Erreur: ${error.message}</div>`;
+            }
+        }
+
+        // Test des icônes
+        async function testIcons() {
+            const iconDiv = document.getElementById('iconTest');
+            const manifest = await fetch('/manifest.json').then(r => r.json());
+            
+            let html = '<div class="info">Test de chargement des icônes:</div>';
+            
+            for (const icon of manifest.icons.slice(0, 4)) { // Tester les 4 premières
+                html += `<img src="${icon.src}" class="icon-test" alt="Icon ${icon.sizes}" 
+                         onload="this.style.border='2px solid green'" 
+                         onerror="this.style.border='2px solid red'">`;
+            }
+            
+            iconDiv.innerHTML = html;
+        }
+
+        // Test stockage
+        function testStorage() {
+            const statusDiv = document.getElementById('storageStatus');
+            
+            try {
+                // Test localStorage
+                localStorage.setItem('pwa-test', 'OK');
+                const localTest = localStorage.getItem('pwa-test') === 'OK';
+                
+                // Test sessionStorage
+                sessionStorage.setItem('pwa-test', 'OK');
+                const sessionTest = sessionStorage.getItem('pwa-test') === 'OK';
+                
+                statusDiv.innerHTML = `
+                    <div class="${localTest ? 'success' : 'error'}">
+                        ${localTest ? '✅' : '❌'} localStorage: ${localTest ? 'Fonctionne' : 'Erreur'}
+                    </div>
+                    <div class="${sessionTest ? 'success' : 'error'}">
+                        ${sessionTest ? '✅' : '❌'} sessionStorage: ${sessionTest ? 'Fonctionne' : 'Erreur'}
+                    </div>
+                `;
+                
+                // Nettoyer
+                localStorage.removeItem('pwa-test');
+                sessionStorage.removeItem('pwa-test');
+                
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ Erreur: ${error.message}</div>`;
+            }
+        }
+
+        // Informations système
+        function getSystemInfo() {
+            const infoDiv = document.getElementById('systemInfo');
+            
+            const info = {
+                'User Agent': navigator.userAgent,
+                'Plateforme': navigator.platform,
+                'Langue': navigator.language,
+                'En ligne': navigator.onLine ? 'Oui' : 'Non',
+                'Cookles activés': navigator.cookieEnabled ? 'Oui' : 'Non',
+                'URL actuelle': window.location.href,
+                'Protocol': window.location.protocol,
+                'Mode standalone': window.matchMedia('(display-mode: standalone)').matches ? 'Oui' : 'Non'
+            };
+            
+            let html = '';
+            for (const [key, value] of Object.entries(info)) {
+                html += `<div><strong>${key}:</strong> ${value}</div>`;
+            }
+            
+            infoDiv.innerHTML = html;
+        }
+
+        // Installation PWA
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBtn').style.display = 'inline-block';
+            document.getElementById('installStatus').innerHTML = 
+                '<div class="success">🎉 Installation PWA disponible!</div>';
+        });
+
+        async function installPWA() {
+            if (!deferredPrompt) {
+                document.getElementById('installStatus').innerHTML = 
+                    '<div class="warning">⚠️ Installation non disponible. Utilisez Safari > Partager > Ajouter à l\'écran d\'accueil</div>';
+                return;
+            }
+
+            const result = await deferredPrompt.prompt();
+            document.getElementById('installStatus').innerHTML = 
+                `<div class="${result.outcome === 'accepted' ? 'success' : 'info'}">
+                    ${result.outcome === 'accepted' ? '✅ App installée!' : 'ℹ️ Installation annulée'}
+                </div>`;
+            
+            deferredPrompt = null;
+            document.getElementById('installBtn').style.display = 'none';
+        }
+
+        // Utilitaires
+        async function unregisterSW() {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const registration of registrations) {
+                await registration.unregister();
+            }
+            document.getElementById('swStatus').innerHTML = 
+                '<div class="info">🗑️ Service Workers désinstallés</div>';
+        }
+
+        function clearStorage() {
+            localStorage.clear();
+            sessionStorage.clear();
+            if ('caches' in window) {
+                caches.keys().then(names => names.forEach(name => caches.delete(name)));
+            }
+            document.getElementById('storageStatus').innerHTML = 
+                '<div class="info">🗑️ Cache et stockage vidés</div>';
+        }
+
+        function openDevTools() {
+            alert('Pour ouvrir la console développeur:\n\n• Safari iPhone: Réglages > Safari > Avancé > Inspecteur Web\n• Safari Mac: Développement > Connecter [iPhone]\n• Chrome: F12 ou Cmd+Option+I');
+        }
+
+        // Initialisation
+        window.addEventListener('load', () => {
+            checkBrowser();
+            
+            // Vérifier si déjà en mode standalone
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                document.getElementById('installStatus').innerHTML = 
+                    '<div class="success">🎉 App déjà installée et lancée en mode standalone!</div>';
+            }
+        });
+    </script>
+</body>
+</html> 

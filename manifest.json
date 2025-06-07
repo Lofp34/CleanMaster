@@ -1,0 +1,71 @@
+{
+  "name": "CleanMaster - Ménage Motivant",
+  "short_name": "CleanMaster",
+  "description": "Votre compagnon motivant pour un foyer impeccable",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#7c3aed",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "fr",
+  "categories": ["productivity", "lifestyle"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3MiA3MiI+PGNpcmNsZSBjeD0iMzYiIGN5PSIzNiIgcj0iMzAiIGZpbGw9IiM3YzNhZWQiLz48dGV4dCB4PSIzNiIgeT0iNDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSJib2xkIj5DTTwvdGV4dD48L3N2Zz4=",
+      "sizes": "72x72",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5NiA5NiI+PGNpcmNsZSBjeD0iNDgiIGN5PSI0OCIgcj0iNDAiIGZpbGw9IiM3YzNhZWQiLz48dGV4dCB4PSI0OCIgeT0iNTUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIj5DTTwvdGV4dD48L3N2Zz4=",
+      "sizes": "96x96",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjggMTI4Ij48Y2lyY2xlIGN4PSI2NCIgY3k9IjY0IiByPSI1NSIgZmlsbD0iIzdjM2FlZCIvPjx0ZXh0IHg9IjY0IiB5PSI3NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyMiIgZm9udC13ZWlnaHQ9ImJvbGQiPkNNPC90ZXh0Pjwvc3ZnPg==",
+      "sizes": "128x128",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojN2MzYWVkIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojYTg1NWY3Ii8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PGNpcmNsZSBjeD0iOTYiIGN5PSI5NiIgcj0iODUiIGZpbGw9InVybCgjYmcpIiBzdHJva2U9IiM1YjIxYjYiIHN0cm9rZS13aWR0aD0iNCIvPjx0ZXh0IHg9Ijk2IiB5PSIxMTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMzAiIGZvbnQtd2VpZ2h0PSJib2xkIj5DTTwvdGV4dD48Y2lyY2xlIGN4PSI2MCIgY3k9IjUwIiByPSI0IiBmaWxsPSIjZmJiZjI0Ii8+PGNpcmNsZSBjeD0iMTMwIiBjeT0iNjAiIHI9IjMiIGZpbGw9IiNmYmJmMjQiLz48L3N2Zz4=",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojN2MzYWVkIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojYTg1NWY3Ii8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIyMzAiIGZpbGw9InVybCgjYmcpIiBzdHJva2U9IiM1YjIxYjYiIHN0cm9rZS13aWR0aD0iOCIvPjx0ZXh0IHg9IjI1NiIgeT0iMzAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjgwIiBmb250LXdlaWdodD0iYm9sZCI+Q008L3RleHQ+PGNpcmNsZSBjeD0iMTUwIiBjeT0iMTMwIiByPSIxMCIgZmlsbD0iI2ZiYmYyNCIvPjxjaXJjbGUgY3g9IjM2MCIgY3k9IjE1MCIgcj0iOCIgZmlsbD0iI2ZiYmYyNCIvPjxjaXJjbGUgY3g9IjEzMCIgY3k9IjM2MCIgcj0iMTAiIGZpbGw9IiNmYmJmMjQiLz48Y2lyY2xlIGN4PSIzODAiIGN5PSIzMzAiIHI9IjgiIGZpbGw9IiNmYmJmMjQiLz48L3N2Zz4=",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Voir ma progression",
+      "short_name": "Progression",
+      "description": "Voir l'état d'avancement du ménage",
+      "url": "/#progression",
+      "icons": [
+        {
+          "src": "icons/shortcut-progress.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Motivation",
+      "short_name": "Boost",
+      "description": "Recevoir un message motivant",
+      "url": "/#motivation",
+      "icons": [
+        {
+          "src": "icons/shortcut-motivation.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+} 

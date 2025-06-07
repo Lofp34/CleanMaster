@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Créateur d'icônes PNG CleanMaster</title>
+</head>
+<body>
+    <h1>Générateur d'icônes PNG pour CleanMaster PWA</h1>
+    <div id="output"></div>
+    
+    <script>
+        const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+        
+        sizes.forEach(size => {
+            // Créer canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#7c3aed');
+            gradient.addColorStop(1, '#a855f7');
+            
+            // Dessiner le background
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(size/2, size/2, size/2 - 8, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Border
+            ctx.strokeStyle = '#5b21b6';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            
+            // Brush handle
+            ctx.save();
+            ctx.translate(size/2, size/2);
+            ctx.rotate(-Math.PI/6);
+            ctx.scale(size/300, size/300);
+            
+            ctx.fillStyle = '#8b4513';
+            ctx.fillRect(-40, -4, 70, 8);
+            
+            // Brush ferrule
+            ctx.fillStyle = '#c0c0c0';
+            ctx.fillRect(25, -6, 10, 12);
+            
+            // Bristles
+            ctx.fillStyle = '#4ade80';
+            ctx.fillRect(34, -5, 2, 14);
+            ctx.fillRect(37, -4, 2, 13);
+            ctx.fillRect(40, -6, 2, 15);
+            ctx.fillRect(43, -4, 2, 13);
+            
+            ctx.restore();
+            
+            // Stars
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath();
+            ctx.arc(size*0.3, size*0.25, Math.max(2, size*0.02), 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(size*0.7, size*0.3, Math.max(1, size*0.015), 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(size*0.25, size*0.7, Math.max(2, size*0.02), 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(size*0.75, size*0.65, Math.max(1, size*0.015), 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Text for larger icons
+            if (size >= 144) {
+                ctx.fillStyle = 'white';
+                ctx.font = `bold ${Math.max(12, size*0.08)}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.fillText('CM', size/2, size*0.85);
+            }
+            
+            // Convert to PNG and create download link
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `icon-${size}x${size}.png`;
+                link.textContent = `Télécharger icon-${size}x${size}.png`;
+                link.style.display = 'block';
+                link.style.margin = '10px';
+                link.style.padding = '10px';
+                link.style.background = '#7c3aed';
+                link.style.color = 'white';
+                link.style.textDecoration = 'none';
+                link.style.borderRadius = '4px';
+                
+                document.getElementById('output').appendChild(link);
+            }, 'image/png');
+            
+            // Show preview
+            canvas.style.width = '100px';
+            canvas.style.height = '100px';
+            canvas.style.margin = '10px';
+            canvas.style.border = '1px solid #ccc';
+            document.getElementById('output').appendChild(canvas);
+        });
+    </script>
+    
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        #output { display: flex; flex-wrap: wrap; align-items: center; }
+    </style>
+</body>
+</html> 
